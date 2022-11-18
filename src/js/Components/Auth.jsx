@@ -1,8 +1,9 @@
 import { onAuthStateChanged } from 'firebase/auth';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useAppValue } from '../AppContext';
 import { auth, checkPanoerDb, signInDb } from '../Utils/firebase';
+import VideoJS from './VideoJS';
 
 console.log('↳ About.jsx');
 
@@ -10,6 +11,34 @@ function Auth() {
 	console.log('%c Auth()', 'color:darkorange');
 
 	const { currentUser, setCurrentUser } = useAppValue();
+
+	const playerRef = React.useRef(null);
+
+	const videoJsOptions = {
+		autoplay: true,
+		controls: true,
+		responsive: true,
+		fluid: true,
+		sources: [
+			{
+				src: '//commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+				type: 'video/mp4',
+			},
+		],
+	};
+
+	const handlePlayerReady = (player) => {
+		playerRef.current = player;
+
+		// You can handle player events here, for example:
+		player.on('waiting', () => {
+			console.log('player is waiting');
+		});
+
+		player.on('dispose', () => {
+			console.log('player will dispose');
+		});
+	};
 
 	const handleBtnLogout = (e) => {
 		console.log('handleBtnLogout(e)', e);
@@ -85,6 +114,7 @@ function Auth() {
 					<button className='btn' type='button' onClick={handleBtnLogout}>
 						logout
 					</button>
+					<VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
 				</div>
 			)}
 			{!currentUser && (
